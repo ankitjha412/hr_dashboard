@@ -73,6 +73,7 @@ Data Visualization: Chart.js
 UI Feedback: React Hot Toast
 
 Folder Structure Overview
+
 ![image](https://github.com/user-attachments/assets/1918f45b-a348-4af3-9528-dd31f8e1e671)
 
 
