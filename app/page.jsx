@@ -16,22 +16,23 @@ export default function DashboardPage() {
   const router = useRouter()
   const { addBookmark } = useBookmarks()
 
-  // ✅ Redirect if not logged in
+  // ✅ Check login on mount
   useEffect(() => {
     const user = localStorage.getItem('user')
     if (!user) {
       toast.error('Please log in first')
-      router.push('/')
+      router.push('/login') // ✅ direct to /login
     } else {
       setUserName(user)
     }
-  }, [])
+  }, [router])
 
-  // ✅ Fetch and enrich users
+  // ✅ Fetch and enrich dummy users
   useEffect(() => {
-    fetch('https://dummyjson.com/users?limit=20')
-      .then(res => res.json())
-      .then(data => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch('https://dummyjson.com/users?limit=20')
+        const data = await res.json()
         const enriched = data.users.map(user => ({
           ...user,
           department: getRandomDepartment(),
@@ -39,8 +40,14 @@ export default function DashboardPage() {
         }))
         setUsers(enriched)
         setFilteredUsers(enriched)
+      } catch (err) {
+        toast.error('Failed to fetch users')
+      } finally {
         setLoading(false)
-      })
+      }
+    }
+
+    fetchUsers()
   }, [])
 
   // ✅ Action handlers
@@ -56,7 +63,6 @@ export default function DashboardPage() {
 
   const handlePromote = (user) => {
     toast.success(`${user.firstName} has been promoted!`)
-    // Optional: update status if needed
   }
 
   // ✅ Filter logic
@@ -82,11 +88,11 @@ export default function DashboardPage() {
     setFilteredUsers(result)
   }
 
-  // ✅ Loading state
+  // ✅ Loading screen
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">Loading users...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <p className="text-lg text-gray-700 dark:text-gray-300">Loading users...</p>
       </div>
     )
   }
@@ -98,10 +104,10 @@ export default function DashboardPage() {
           Welcome, {userName} 👋
         </h1>
 
-        {/* 🔍 Search and Filter */}
+        {/* Search & Filter Bar */}
         <SearchFilter onSearch={handleFilter} />
 
-        {/* 👥 Scrollable Cards */}
+        {/* User Cards */}
         <div className="h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredUsers.map(user => (
